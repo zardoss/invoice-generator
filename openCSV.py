@@ -6,9 +6,9 @@ import shutil
 from tempfile import NamedTemporaryFile
 
 # Name of file we're reading from
-filename = "data.csv"
+filename = "CSV/data.csv"
 temp_file = NamedTemporaryFile(mode="w+", delete=False)
-
+print("[*]\tStarting CSV conversion")
 # -- STAGE 1 -- Merging duplicate entries based on name.
 with open(filename, newline='') as f:
     dataCSV = csv.reader(f, delimiter=',')
@@ -20,49 +20,33 @@ with open(filename, newline='') as f:
     freshoutput, names = [], []
     
     finaloutput = ""
-
+    counter = 0
     for row in data:
+        counter += 1
         # Stores every element of every row from data
         every = [rw for rw in data if rw[0] == row[0]]
-
         # Resets the string for each new name
         finaloutput = ""
-        
-        # every[0]    - each row
-        # every[0][0] - names
-        # every[0][1] - product
-        # every[0][2] - amount
-        # every[0][3] - date
-        # every[0][4] - unit_cost
 
-        # If name is already in the list 'names'
-        # Append the required attributes from the row repeating the name to the row where the first instance of the name.
-        # print("Is " + every[0][0] + "in names")
-        counter = 0
         if every[0][0] in names:
-            for name in every:
-                counter += 1
-                if counter == 1:
-                    # This appends at the beginning of the final output entry
-                    finaloutput += "{\"name\": \"" + every[0][3] + " - " + every[0][1] + "\", \"quantity\": " + every[0][2] + ", \"unit_cost\":" + every[0][4] + "}"
-                if counter > 1:
-                    finaloutput += ", {\"name\": \"" + every[0][3] + " - " + every[0][1] + "\", \"quantity\": " + every[0][2] + ", \"unit_cost\":" + every[0][4] + "}"
             # When skipping the rest of this for loop, it moves to the next name/row in the list rather than check if the name that repeated here has repeated more than 2 times.
-
-        if every[0][0] is not names:
-            # Appends every name from data (should only happen once)
-            names.append(every[0][0])
+            finaloutput += ", {\"name\": \"" + every[0][3] + " - " + every[0][1] + "\", \"quantity\": " + every[0][2] + ", \"unit_cost\":" + every[0][4] + "}"
             continue
+
+        # This appends at the beginning of the final output entry
+        finaloutput += "{\"name\": \"" + every[0][3] + " - " + every[0][1] + "\", \"quantity\": " + every[0][2] + ", \"unit_cost\":" + every[0][4] + "}"
+        # Appends every name from data (should only happen once)
+        names.append(every[0][0])
         
-        print(finaloutput)
+        print("[" + str(counter) + "]\t" + finaloutput)
         # Appends the necessary string format of data from the data csv file to freshoutput. The order these are appended correlates with the order the names are stored.
         freshoutput.append(finaloutput)
-        counter = 0
 
     # Print every element in names
     for name in freshoutput:
-        print(name)
+        print("[*]\t" + name)
 
+print("[*]\tEnding CSV conversion")
 
 # # -- STAGE 2 -- To write new data to CSV file...
 # with open(filename, "r") as csvfile, temp_file:
