@@ -19,3 +19,4 @@ Natacha Mothershed  ,20/11/2020,"[{""name"":""20/11/2020 - Whole Milk"", ""quan
 Porsha Dominy  ,13/11/2020,"[{""name"":""13/11/2020 - Whole Milk"", ""quantity"":1.00, ""unit_cost"":1.45}]"
 Roosevelt Douse  ,17/11/2020,"[{""name"":""17/11/2020 - Whole Milk"", ""quantity"":5.50, ""unit_cost"":1.45}]"
 Silva Cimino  ,09/11/2020,"[{""name"":""09/11/2020 - Whole Milk"", ""quantity"":1.50, ""unit_cost"":1.45}]"
+name,date,"[{""name"":""date - product"", ""quantity"":amount, ""unit_cost"":unit_cost}]"

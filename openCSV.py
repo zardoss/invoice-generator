@@ -3,69 +3,92 @@ import sys
 import csv
 import operator
 import shutil
+import typer
 from tempfile import NamedTemporaryFile
+from collections import defaultdict
 
 # Name of file we're reading from
-filename = "CSV/data.csv"
 temp_file = NamedTemporaryFile(mode="w+", delete=False)
-print("[*]\tStarting CSV conversion")
-# -- STAGE 1 -- Merging duplicate entries based on name.
-with open(filename, newline='') as f:
-    dataCSV = csv.reader(f, delimiter=',')
-    # Sorts the data to order alphabetically in name column
-    reader = sorted(dataCSV, key=operator.itemgetter(0))
-    # Stores CSV data to a list: data
-    data = list(reader)
-    # names stores each name from the data without repeating it
-    freshoutput, names = [], []
-    
-    finaloutput = ""
-    counter = 0
-    for row in data:
-        counter += 1
-        # Stores every element of every row from data
-        every = [rw for rw in data if rw[0] == row[0]]
-        # Resets the string for each new name
-        finaloutput = ""
+# Creates an empty dictionary to store data ready for new file
+d = defaultdict(lambda: [])
 
-        if every[0][0] in names:
-            # When skipping the rest of this for loop, it moves to the next name/row in the list rather than check if the name that repeated here has repeated more than 2 times.
-            finaloutput += ", {\"name\": \"" + every[0][3] + " - " + every[0][1] + "\", \"quantity\": " + every[0][2] + ", \"unit_cost\":" + every[0][4] + "}"
-            continue
+def reformatCSVData(filename):
+    print("[*]\tStage 1 - reformat the data from " + filename)
+    # -- STAGE 1 -- Merging duplicate entries based on name.
+    with open(filename, newline='') as f:
+        reader = csv.reader(f, delimiter=',')
+        # Stores CSV data to a list: data
+        data = list(reader)
+        # Deletes the headers that are always at the beginning of the list
+        # TODO: Can't always rely on CSV file having headers... Maybe find alternative solution to checking for them / dealing with them
+        del data[0]
+        # For every row/line of info in data.csv file
+        for line in data:
+            
+            # Append data to dictionary using line[0] as a key.
+            d[line[0]].append({
+                "name": line[0],
+                "date": line[3],
+                "items" : "{\"name\":\"" + line[3] + " - " + line[1] + "\", \"quantity\":" + line[2] + ", \"unit_cost\":" + line[4] + "}"
+            })
 
-        # This appends at the beginning of the final output entry
-        finaloutput += "{\"name\": \"" + every[0][3] + " - " + every[0][1] + "\", \"quantity\": " + every[0][2] + ", \"unit_cost\":" + every[0][4] + "}"
-        # Appends every name from data (should only happen once)
-        names.append(every[0][0])
+def writeNewDataToFile(filename, newFileName):
+    # -- STAGE 2 -- To write new data to CSV file...
+    print("[*]\tStage 2 - Write newly formatted data to " + newFileName)
+    with open(filename, "r") as csvfile, temp_file:
+        # Headers for new CSV file
+        fieldnames = ['name','date','items']
+        # Will be writing to a temp_file csv using the fieldnames above
+        writer = csv.DictWriter(temp_file, fieldnames=fieldnames)
+        # Write headers
+        writer.writeheader()
+
+        # For each unique name, write their order to file
+        for name in sorted(d.keys()):
+            counter = 0
+            everyorder = ""
+            for order in d[name]:
+                counter += 1
+                if name == order['name']:
+                    # Correctly formats the items column in list[dict] format
+                    if counter == len(d[name]) and len(d[name]) != 1:
+                        everyorder += order['items'] + "]"
+                    elif counter == 1 and len(d[name]) != 1:
+                        everyorder += "[" + order['items'] + ","
+                    elif len(d[name]) == 1:
+                        everyorder += "[" + order['items'] + "]"
+                    else:
+                        everyorder += order['items'] + ","
+
+            # Writes each row of new CSV file
+            writer.writerow({
+                        'name': order['name'],
+                        'date': order['date'],
+                        'items': everyorder
+                    })
+        try:
+            # Creates new CSV file with written info from above
+            shutil.move(temp_file.name, newFileName)
+            print("[*]\tSuccessfully saved file")
+        except:
+            # Will print this if unsuccessful
+            print("File not saved fucker")
         
-        print("[" + str(counter) + "]\t" + finaloutput)
-        # Appends the necessary string format of data from the data csv file to freshoutput. The order these are appended correlates with the order the names are stored.
-        freshoutput.append(finaloutput)
+def main(csv_name: str = typer.Argument('invoices.csv')):
+    print("[*]\tStarting CSV formatter")
+    # If no csv file is given to program, shut down.
+    if len(sys.argv) == 1:
+        print("[*]\tWe'll get 'em next time")
+        print("[*]\tShutting down CSV formatter")
+        exit()
+    # File names
+    filename = csv_name
+    newFileName = "reformatted_" + filename
+    # Reformats the simple csv file data so I can create invoices
+    reformatCSVData(filename)
+    # Writes the data in a more complicated format to a new file
+    writeNewDataToFile(filename, newFileName)
+    print("[*]\tShutting down CSV formatter")
 
-    # Print every element in names
-    for name in freshoutput:
-        print("[*]\t" + name)
-
-print("[*]\tEnding CSV conversion")
-
-# # -- STAGE 2 -- To write new data to CSV file...
-# with open(filename, "r") as csvfile, temp_file:
-#     # Will be reading from the simple csv file
-#     reader = csv.DictReader(csvfile)
-#     # fieldnames for new CSV file
-#     fieldnames = ['name','date', 'items']
-#     # Will be writing to a temp_file csv using the fieldnames above
-#     writer = csv.DictWriter(temp_file, fieldnames=fieldnames)
-#     # Writes column headers
-#     writer.writeheader()
-#     # For every row in csvfile
-#     for row in reader:
-#         # write each new row
-#         writer.writerow({
-#             'name': row['name'],
-#             'date': row['date'],
-#             # Want to write the items column according to the appropriate name.
-#             'items': "name"
-#             # 'items': '[{\"name\":\"' + row['date'] +  " - " + row['product'] + "\",\"quantity\":" + row['amount'] + ", \"unit_cost\"" + row["unit_cost"] + "}]"
-#         })
-#     shutil.move(temp_file.name, "USETHIS.csv")
+if __name__ == "__main__":
+    typer.run(main)

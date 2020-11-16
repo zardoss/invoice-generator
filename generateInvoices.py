@@ -5,12 +5,23 @@ import os
 import csv
 import typer
 
+url = "https://invoice-generator.com"
+timeout = 5
 # Manually set attributes for the invoices
-from_who = "Kelland Dairy\nLapford, Crediton\nEX17 6AG\n"
-customNote = "Thank you for choosing Kelland Dairy!\n\nIf you need to contact us, you can email or call us.\nmilk@kellanddairy.co.uk\n01363 779134\n\nIf you want to know more about us, visit our website!\nwww.kellanddairy.co.uk"
+# For my company
+# from_who = "Kelland Dairy\nLapford, Crediton\nEX17 6AG\n"
+# customNote = "Thank you for choosing Kelland Dairy!\n\nIf you need to contact us, you can email or call us.\nmilk@kellanddairy.co.uk\n01363 779134\n\nIf you want to know more about us, visit our website!\nwww.kellanddairy.co.uk"
+# ukCurrency = "GBP"
+# ourLogo = "https://www.kellanddairy.co.uk/wp-content/uploads/2018/07/Kelland-Dairy-Final-450-Logo.png"
+# bankInfo = "Payment methods: Bank Transfer, BACS, Standing order or Cheque\nSort code: 30-93-14\nAccount Number: 0556 9802"
+
+# For public show
+from_who = "Leaf Lane\nLeaf City\nLE4F C1T1\n"
+customNote = "Thank you for choosing Leaf!\n\nIf you need to contact us, you can email or call us.\nmilk@leaf.co.uk\n011111 11111\n\nIf you want to know more about us, visit our website!\nwww.leaf.co.uk"
 ukCurrency = "GBP"
-ourLogo = "https://www.kellanddairy.co.uk/wp-content/uploads/2018/07/Kelland-Dairy-Final-450-Logo.png"
-bankInfo = "Payment methods: Bank Transfer, BACS, Standing order or Cheque\nSort code: 30-93-14\nAccount Number: 0556 9802"
+ourLogo = "https://i.pinimg.com/originals/c5/6d/dd/c56ddde762380757619f1e090b63b7aa.jpg"
+bankInfo = "Payment methods: Bank Transfer, BACS, Standing order or Cheque\nSort code: 01-02-03\nAccount Number: 1234 5678"
+
 
 @dataclass
 class Invoice:
@@ -55,7 +66,7 @@ class ApiConnector:
         self.headers = {"Content-Type": "application/json"}
         # Website that we're using to generate the PDF invoices
         self.url = 'https://invoice-generator.com'
-        # 
+        # TODO; write description
         self.invoices_directory = f"{os.path.dirname(os.path.abspath(__file__))}/{'invoices'}"
 
     def connect_to_api_and_save_invoice_pdf(self, invoice: Invoice) -> None:
@@ -63,7 +74,7 @@ class ApiConnector:
             'to': invoice.name,
             'from': from_who,
             'logo': ourLogo,
-            'date': invoice.date,
+            # 'date': invoice.date,
             'items': invoice.items,
             'notes': customNote,
             'currency': ukCurrency,
@@ -81,23 +92,43 @@ class ApiConnector:
         invoice_name = f"{invoice.name}_invoice.pdf"
         invoice_path = f"{self.invoices_directory}/{invoice_name}"
         with open(invoice_path, 'wb') as f:
-            typer.echo(f"Generate invoice for {invoice_name}")
+            typer.echo(f"[*]\tGenerate invoice for {invoice_name}")
             f.write(pdf_content)
 
+# Checks internet connection
+def checkConnection():
+    try:
+        request = requests. get(url, timeout=timeout)
+        print("[*]\tInternet Connection : Estabilished")
+        return True
+    except (requests. ConnectionError, requests. Timeout) as exception:
+        print("[*]\tInternet Connection : Failed")
+        return False
 
 def main(csv_name: str = typer.Argument('invoices.csv')):
+    print("[*]\tStarting invoice generator")
     # Lets the user know it's running
-    print("[*]  Internet required to run")
-    typer.echo(f"Generating invoices using : {csv_name}")
+    if checkConnection() == False:
+        print("[*]\tInternet required to run")
+        print("[*]\tFailed to generate invoices")
+        exit()
+    
+    typer.echo(f"[*]\tGenerating invoices from : {csv_name}")
     csv_reader = CSVParser(csv_name)
     array_of_invoices = csv_reader.get_array_of_invoices()
     api = ApiConnector()
+    # Number of invoices to generate from data
+    nInvoices = len(array_of_invoices)
     counter = 0
+    print(f"[*]\tThere are {nInvoices} invoices to generate")
     for invoice in array_of_invoices:
-        counter = counter + 1
-        api.connect_to_api_and_save_invoice_pdf(invoice)
-        if counter == array_of_invoices.__len__:
-            print("Done")
+        counter += 1
+        api.connect_to_api_and_save_invoice_pdf(invoice, counter)
+        if counter == nInvoices:
+            print("[*]\tAll invoices have been successfully generated!")
+
+    print("[*]\tExiting invoice generator")
+    exit()
 
 if __name__ == "__main__":
     typer.run(main)
