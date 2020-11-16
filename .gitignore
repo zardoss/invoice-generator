@@ -3,6 +3,11 @@
 # Created by https://www.gitignore.io/api/macos,linux,django,python,pycharm
 ### Own folders/files ###
 Old
+*.DS_Store
+venv
+invoices
+*.pdf
+
 ### Django ###
 *.log
 *.pot
