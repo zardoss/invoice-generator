@@ -7,6 +7,7 @@ Old
 venv
 invoices
 *.pdf
+CSV
 
 ### Django ###
 *.log
