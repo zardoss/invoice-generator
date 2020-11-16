@@ -1,0 +1,13 @@
+# print(row)
+        # Write following info for each row
+        # writer.writerow({
+        #     "name": row["name"],
+        #     "date":  "12/02/2020",
+        #     "items": "big lol"
+        # })
+    # Should rewrite the file by renaming the temp file the same name as original file.
+    # shutil.move(temp_file.name, filename)
+# ------ My Idea ------
+# Store array of names without repeating repeated entries
+    # Go through each row containing the specified name as selected in the array
+        # Append specified info to selected string variable for column we want to append to

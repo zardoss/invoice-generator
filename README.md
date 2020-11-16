@@ -1,6 +1,7 @@
 # invoice-generator
 
-Contents
+<h2>Contents</h2>
+
 1. [What is this project?](#whatisthisproject)
 2. [How do I use this?](#howdoiusethis)
     1. [Virtual Environment](#venv)
@@ -11,6 +12,8 @@ Contents
 4. [Any issues?](#anyissues)
 5. [References](#references)
 6. [Credits](#credits)
+
+---
 
 <!-- Section 1 -->
 <h2>What is this project?<a name="whatisthisproject"></a></h2>
@@ -75,12 +78,15 @@ This whole project is currently dependant on this free online [invoice generator
 <h2> Any issues? <a name="anyissues"></a></h2>
 Contact me via Discord: zardoss#6558
 
+---
+
 <h2> References <a name="references"></a></h2>
 
 - [Invoice generator tutorial (Partially works - good foundation material)](https://www.youtube.com/watch?v=icvjtqoufMM&t=849s)
 - [Indexing/Slicing for lists, tuple, strings and other sequential data](https://railsware.com/blog/python-for-machine-learning-indexing-and-slicing-for-lists-tuples-strings-and-other-sequential-types/)
 - [Online invoice generator](https://invoice-generator.com)
-
+- [Used to check if invoices folder exists](https://www.guru99.com/python-check-if-file-exists.html)
+- [Aesthetic: Press key to exit](https://intellipaat.com/community/5566/how-do-i-make-python-to-wait-for-a-pressed-key)
 ---
 
 <h2> Credits <a name="credits"></a></h2>

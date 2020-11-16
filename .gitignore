@@ -2,12 +2,10 @@
 
 # Created by https://www.gitignore.io/api/macos,linux,django,python,pycharm
 ### Own folders/files ###
-Old
-*.DS_Store
 venv
-invoices
+*.DS_Store
 *.pdf
-CSV
+*.csv
 
 ### Django ###
 *.log

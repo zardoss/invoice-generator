@@ -1,12 +1,21 @@
 import requests
+import os
 from dataclasses import dataclass
 from typing import List
-import os
+import pathlib
 import csv
 import typer
 
+# For checking internet connection to website we're using
 url = "https://invoice-generator.com"
 timeout = 5
+# Current working directory
+currentpath = os.getcwd()
+# Folder we want to store invoices to
+invoiceFolder = "invoices"
+# Directory where we want invoices to go
+path = pathlib.Path(f"{currentpath}/{invoiceFolder}")
+
 # Manually set attributes for the invoices
 # For my company
 # from_who = "Kelland Dairy\nLapford, Crediton\nEX17 6AG\n"
@@ -92,7 +101,7 @@ class ApiConnector:
         invoice_name = f"{invoice.name}_invoice.pdf"
         invoice_path = f"{self.invoices_directory}/{invoice_name}"
         with open(invoice_path, 'wb') as f:
-            typer.echo(f"[*]\tGenerate invoice for {invoice_name}")
+            typer.echo(f"[*]\t\tGenerate invoice for {invoice_name}")
             f.write(pdf_content)
 
 # Checks internet connection
@@ -105,6 +114,17 @@ def checkConnection():
         print("[*]\tInternet Connection : Failed")
         return False
 
+def createDirectory():
+    if path.exists() == False:
+        try:
+            os.mkdir(path)
+        except OSError:
+            print ("[*]\tCreation of the directory %s failed" % path)
+        else:
+            print ("[*]\tSuccessfully created the directory %s " % path)
+    else: 
+        print(f"[*]\tThere's already a directory called {invoiceFolder} that exists. I'll begin generating the invoices")
+
 def main(csv_name: str = typer.Argument('invoices.csv')):
     print("[*]\tStarting invoice generator")
     # Lets the user know it's running
@@ -112,7 +132,7 @@ def main(csv_name: str = typer.Argument('invoices.csv')):
         print("[*]\tInternet required to run")
         print("[*]\tFailed to generate invoices")
         exit()
-    
+    createDirectory()
     typer.echo(f"[*]\tGenerating invoices from : {csv_name}")
     csv_reader = CSVParser(csv_name)
     array_of_invoices = csv_reader.get_array_of_invoices()
@@ -123,12 +143,12 @@ def main(csv_name: str = typer.Argument('invoices.csv')):
     print(f"[*]\tThere are {nInvoices} invoices to generate")
     for invoice in array_of_invoices:
         counter += 1
-        api.connect_to_api_and_save_invoice_pdf(invoice, counter)
+        api.connect_to_api_and_save_invoice_pdf(invoice)
         if counter == nInvoices:
             print("[*]\tAll invoices have been successfully generated!")
 
-    print("[*]\tExiting invoice generator")
-    exit()
+    input("[*]\tPress any key to exit")
+    print("[*]\tExited invoice generator!")
 
 if __name__ == "__main__":
     typer.run(main)
