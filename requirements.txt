@@ -3,3 +3,5 @@ shutil
 tempfile
 operator
 collections
+tkmacosx
+tkinter

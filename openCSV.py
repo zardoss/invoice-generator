@@ -24,7 +24,6 @@ def reformatCSVData(filename):
         del data[0]
         # For every row/line of info in data.csv file
         for line in data:
-            
             # Append data to dictionary using line[0] as a key.
             d[line[0]].append({
                 "name": line[0],
@@ -76,11 +75,15 @@ def writeNewDataToFile(filename, newFileName):
         
 def main(csv_name: str = typer.Argument('invoices.csv')):
     print("[*]\tStarting CSV formatter")
-    # If no csv file is given to program, shut down.
-    if len(sys.argv) == 1:
+    if len(csv_name) == 0:
         print("[*]\tWe'll get 'em next time")
         print("[*]\tShutting down CSV formatter")
         exit()
+    # If no csv file is given to program, shut down.
+    # if len(sys.argv) == 1:
+    #     print("[*]\tWe'll get 'em next time")
+    #     print("[*]\tShutting down CSV formatter")
+    #     exit()
     # File names
     filename = csv_name
     newFileName = "reformatted_" + filename
