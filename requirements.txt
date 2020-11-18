@@ -1,3 +1,5 @@
+xlrd
+pandas
 csv
 shutil
 tempfile

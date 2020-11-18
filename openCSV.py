@@ -22,6 +22,9 @@ def reformatCSVData(filename):
         # Deletes the headers that are always at the beginning of the list
         # TODO: Can't always rely on CSV file having headers... Maybe find alternative solution to checking for them / dealing with them
         del data[0]
+
+        global litres
+        litres = 0
         # For every row/line of info in data.csv file
         for line in data:
             # Append data to dictionary using line[0] as a key.
@@ -30,6 +33,7 @@ def reformatCSVData(filename):
                 "date": line[3],
                 "items" : "{\"name\":\"" + line[3] + " - " + line[1] + "\", \"quantity\":" + line[2] + ", \"unit_cost\":" + line[4] + "}"
             })
+
 
 def writeNewDataToFile(filename, newFileName):
     # -- STAGE 2 -- To write new data to CSV file...
