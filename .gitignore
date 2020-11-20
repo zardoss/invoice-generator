@@ -7,6 +7,12 @@
 /*.DS_Store
 /*.pdf
 /*.csv
+Old
+venv
+*.pdf
+*.csv
+*.DS_Store
+*.xlsx
 
 ### Django ###
 *.log
