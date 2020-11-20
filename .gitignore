@@ -2,11 +2,11 @@
 
 # Created by https://www.gitignore.io/api/macos,linux,django,python,pycharm
 ### Own folders/files ###
-venv
-*.xlsx
-*.DS_Store
-*.pdf
-*.csv
+/venv
+/*.xlsx
+/*.DS_Store
+/*.pdf
+/*.csv
 
 ### Django ###
 *.log

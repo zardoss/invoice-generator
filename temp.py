@@ -10,26 +10,21 @@ import time
 import json
 import csv
 import xlrd
-import concurrent.futures
 # Import my own scripts
 import openCSV as o
 import generateInvoices as g
 from openCSV import main
 
-linux, macOS, windows = False, False, False
-
-if platform == "linux" or platform == "linux2":
-    linux = True
-    print("[*]\tLinux Distrib\t[*]")
-    # linux
-elif platform == "darwin":
-    macOS = True
-    print("[*]\tMac OS\t[*]")
-    # Fixes GUI issues for macosx - https://pypi.org/project/tkmacosx/
-    from tkmacosx import Button, ColorVar, Marquee, Colorscale
-elif platform == "win32":
-    windows = True
-    print("[*]\tWindows\t[*]")
+# if platform == "linux" or platform == "linux2":
+#     print("[*]\tLinux Distrib\t[*]")
+#     # linux
+# elif platform == "darwin":
+#     print("[*]\tMac OS\t[*]")
+#     # Fixes GUI issues for macosx - https://pypi.org/project/tkmacosx/
+#     from tkmacosx import Button, ColorVar, Marquee, Colorscale
+# elif platform == "win32":
+#     print("[*]\tWindows\t[*]")
+#     # Windows...
 
 class InvoiceGUI:
 
@@ -41,15 +36,23 @@ class InvoiceGUI:
         
 
         # ---- Screen Properties ---- #
+        # Default MAC settings
         app_width = 350
         app_height = 400
         # Resize buttons
         widthbtn = int(app_width*0.5)
         heightbtn = int(app_height*0.1)
-        if windows: 
+
+        if platform == "windows" or platform == "win32" or platform == "win64":
+            print("[*]\tWindows\t[*]")
+            # Windows settings
+            app_width = 400
+            app_height = 450
             # Resize buttons
-            widthbtn = int(app_width*0.08)
+            widthbtn = int(app_width*0.1)
             heightbtn = int(app_height*0.005)
+        else:
+            print(f"[*]\t{platform}\t[*]")
 
         screen_width = master.winfo_screenwidth()
         screen_height = master.winfo_screenheight()
@@ -107,12 +110,23 @@ class InvoiceGUI:
         # Position labels
         self.welcome.grid(row=0)
         self.currentlySelected.grid(row = 2)
+
+        # ---- Main Menu ---- #
+        # self.menu = Menu(master)
+        # self.master.config(menu=self.menu)
+
+        # -- Import -- #
+        # self.subMenu = Menu(menu)
+        # self.menu.add_cascade(label="Import", menu=self.subMenu)
+        # self.subMenu.add_command(label="CSV File", command=self.selectFile)
+        # self.subMenu.add_separator()
+        # self.subMenu.add_command(label="Exit", command=exit)
         
     def selectFile(self, master):
         print("Selecting CSV/Excel file")
         # Current directory
         currdir = os.getcwd()
-        tempdir = fdialog.askopenfilename(parent=master, initialdir=currdir, title='Please open your csv file', filetypes=(("all files", "*.*"), ("excel files", "*.xlsx"),("csv files", "*.csv")))
+        tempdir = fdialog.askopenfilename(parent=master, initialdir=currdir, title='Please open your csv file', filetypes=(("excel files", "*.xlsx"),("csv files", "*.csv"), ("all files", "*.*")))
         
         # If file is selected
         if len(tempdir) > 0:
@@ -149,66 +163,37 @@ class InvoiceGUI:
         csv_reader = g.CSVParser(self.filename)
         array_of_invoices = csv_reader.get_array_of_invoices()
         print(f"[*]\tGenerating invoices from : {self.filename}")
-        self.counter = 0
+        nInvoices = len(array_of_invoices)
+        counter = 0
         totalLitres = 0
         unitCost = 0
         totalDolla = 0
-        thread_list = []
-        
+        self.failed = False
+
         for invoice in array_of_invoices:
+            counter += 1
             totalLitres += invoice.items[0]['quantity']
             unitCost = invoice.items[0]['unit_cost']
             totalDolla += (totalLitres*unitCost)
+            try:
+                # self.step(nInvoices, counter)
+                threading.Thread(target=self.step, args = (nInvoices, counter)).start()
+                # threading.Thread(self.generateOneInvoice, invoice).start()
+                threading.Thread(target=self.generateOneInvoice, args=(invoice)).start()
+                # self.generateOneInvoice(invoice)
+            except Exception as e:
+                self.failed = True
+                print(f"Couldn't generate invoice for {invoice.name}\t{e}")
+                # return
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            # steps = [executor.map(self.step,(len(array_of_invoices), _)) for _ in len(array_of_invoices)]
-            results = executor.map(self.generateOneInvoice, array_of_invoices)
-        
-        if self.counter >= len(array_of_invoices):
-            print(f"[*]\tTotals:\t {totalLitres} Litres\t £{totalLitres*1.45}")
-            print("[*]\tAll invoices have been successfully generated!")
-
-        # for invoice in array_of_invoices:
-        #     totalLitres += invoice.items[0]['quantity']
-        #     unitCost = invoice.items[0]['unit_cost']
-        #     totalDolla += (totalLitres*unitCost)
-        #     # with concurrent.futures.ThreadPoolExecutor() as executor:
-        #     #     results = [executor.submit(self.generateOneInvoice, invoice) for invoice in array_of_invoices]
-        #     #     thread = executor.submit(self.generateOneInvoice, invoice)
-        #     # thread = threading.Thread(target=self.generateOneInvoice, args=(invoice,))
-        #     # thread_list.append(thread)
-
-        # for thread in thread_list:
-        #     counter += 1
-        #     invoiceIndex = thread_list.index(thread)
-            
-        #     try:
-        #         # self.step(nInvoices, counter)
-        #         threading.Thread(target=self.step, args = (len(array_of_invoices), counter,)).start()
-        #         thread.start()
-        #         # thread.join()
-        #         # threading.Thread(self.generateOneInvoice, invoice).start()
-        #         # threading.Thread(target=self.generateOneInvoice, args=(invoice)).start()
-        #         # self.generateOneInvoice(invoice)
-        #     except Exception as e:
-        #         self.failed = True
-        #         print(f"Couldn't generate invoice for {invoiceIndex}: {invoice.name}\t{e}")
-        #         # return
-    
-        #     if counter == len(array_of_invoices) and self.failed == False:
-        #         print(f"[*]\tTotals:\t {totalLitres} Litres\t £{totalLitres*1.45}")
-        #         print("[*]\tAll invoices have been successfully generated!")
-        #     elif self.failed == True:
-        #         print("[*]\tInvoices failed to generate")
-
-        # for thread in thread_list:
-        #     thread.join()
-        
+            if counter == nInvoices and self.failed == False:
+                print(f"[*]\tTotals:\t {totalLitres} Litres\t £{totalLitres*1.45}")
+                print("[*]\tAll invoices have been successfully generated!")
+            elif self.failed == True:
+                print("[*]\tInvoices failed to generate")
 
     def generateOneInvoice(self, invoice):
         g.main(invoice)
-        self.counter += 1
-        # self.step(totalInvoices, 1)
 
     def testStep(self, invoice_total, invoices_done):
         if invoice_total > 0:
@@ -232,6 +217,33 @@ class InvoiceGUI:
             self.master.update_idletasks()
         # print(f"{my_progress['value']}")
         # time.sleep(1)
+
+        # Test step function
+        # self.my_progress['value'] = 20
+        # self.master.update_idletasks()
+        # time.sleep(3)
+
+        # self.my_progress['value'] = 40
+        # self.master.update_idletasks()
+        # time.sleep(3)
+
+        # self.my_progress['value'] = 60
+        # self.master.update_idletasks()
+        # time.sleep(3)
+
+        # self.my_progress['value'] = 75
+        # self.master.update_idletasks()
+        # time.sleep(3)
+
+        # self.my_progress['value'] = 100
+        # self.master.update_idletasks()
+        # time.sleep(3)
+
+    # Starts window above all then allows it to fall to background if done so by user    
+    # def raise_above_all(window):
+    #     window.lift()
+    #     window.attributes('-topmost',True)
+    #     window.after_idle(window.attributes,'-topmost',False)
 
 root = Tk()
 e = InvoiceGUI(root)

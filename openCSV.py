@@ -69,6 +69,7 @@ def writeNewDataToFile(filename, newFileName):
                         'date': order['date'],
                         'items': everyorder
                     })
+        temp_file.close()
         try:
             # Creates new CSV file with written info from above
             shutil.move(temp_file.name, newFileName)
@@ -77,7 +78,7 @@ def writeNewDataToFile(filename, newFileName):
             # Will print this if unsuccessful
             print("File not saved fucker")
         
-def main(csv_name: str = typer.Argument('invoices.csv')):
+def main(csv_name: str = typer.Argument('data.csv')):
     print("[*]\tStarting CSV formatter")
     if len(csv_name) == 0:
         print("[*]\tWe'll get 'em next time")

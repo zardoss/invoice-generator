@@ -103,7 +103,10 @@ class ApiConnector:
         invoice_path = f"{self.invoices_directory}/{invoice_name}"
         with open(invoice_path, 'wb') as f:
             typer.echo(f"[*]\t\tGenerated invoice for {invoice_name}")
-            f.write(pdf_content)
+            try:
+                f.write(pdf_content)
+            except Exception as e:
+                print("Error >> ", e)
 
 # Checks internet connection
 def checkConnection():
@@ -162,7 +165,8 @@ def main(invoice):
     try:
         api.connect_to_api_and_save_invoice_pdf(invoice)
     except Exception as e:
-        print(f"[*]\tUnable to save invoice\t{e}")
+        invoice.name.rstrip()
+        print(f"[*]\tUnable to save {invoice.name}'s invoice\t{e}")
         exit()
 
 
