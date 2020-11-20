@@ -45,9 +45,9 @@ def writeNewDataToFile(filename, newFileName):
         writer = csv.DictWriter(temp_file, fieldnames=fieldnames)
         # Write headers
         writer.writeheader()
-
+        sortByName = sorted(d.keys())
         # For each unique name, write their order to file
-        for name in sorted(d.keys()):
+        for name in sortByName:
             counter = 0
             everyorder = ""
             for order in d[name]:
@@ -74,9 +74,9 @@ def writeNewDataToFile(filename, newFileName):
             # Creates new CSV file with written info from above
             shutil.move(temp_file.name, newFileName)
             print("[*]\tSuccessfully saved file")
-        except:
+        except Exception as e:
             # Will print this if unsuccessful
-            print("File not saved fucker")
+            print(f"File not saved fucker\n{e}")
         
 def main(csv_name: str = typer.Argument('data.csv')):
     print("[*]\tStarting CSV formatter")

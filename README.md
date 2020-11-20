@@ -81,12 +81,17 @@ Contact me via Discord: zardoss#6558
 ---
 
 <h2> References <a name="references"></a></h2>
+<h3>Python Program references</h3>
 
 - [Invoice generator tutorial (Partially works - good foundation material)](https://www.youtube.com/watch?v=icvjtqoufMM&t=849s)
 - [Indexing/Slicing for lists, tuple, strings and other sequential data](https://railsware.com/blog/python-for-machine-learning-indexing-and-slicing-for-lists-tuples-strings-and-other-sequential-types/)
 - [Online invoice generator](https://invoice-generator.com)
 - [Used to check if invoices folder exists](https://www.guru99.com/python-check-if-file-exists.html)
 - [Aesthetic: Press key to exit](https://intellipaat.com/community/5566/how-do-i-make-python-to-wait-for-a-pressed-key)
+
+<h3>Spreadsheet references</h3>
+
+- [Multiple tables into master table](https://www.youtube.com/watch?v=q8awNSYNdq4)
 ---
 
 <h2> Credits <a name="credits"></a></h2>

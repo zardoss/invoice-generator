@@ -34,7 +34,7 @@ elif platform == "win32":
 class InvoiceGUI:
 
     def __init__(self, master):
-        backgroundColour = "grey"
+        backgroundColour = "lightgrey"
         self.master = master
         master.title("Invoice Generator V1.0 - Cal")
         master.config(bg=backgroundColour)
@@ -78,36 +78,36 @@ class InvoiceGUI:
         self.selectCSV = Button(frame, text="Select your spreadsheet", bg="white", command=lambda: self.selectFile(master))
         self.generate= Button(frame, text="Generate Invoices!", bg="white", command=self.generateInvoices)
         self.exitButton = Button(frame, text="Exit", bg="yellow", fg="black", command=exit)
-        self.testButton = Button(frame, text="test", bg= "red", command=lambda: threading.Thread(target=self.testStep, args=(100,1)).start())
+        # self.testButton = Button(frame, text="test", bg= "red", command=lambda: threading.Thread(target=self.testStep, args=(100,1)).start())
         # Set buttons sizes
         self.selectCSV.config(width = widthbtn, height = heightbtn)
         self.generate.config(width = widthbtn, height = heightbtn)
-        self.exitButton.config(width = widthbtn, height = heightbtn)
+        self.exitButton.config(width = int(widthbtn*0.6), height = int(heightbtn*0.6))
         # Position buttons
-        self.selectCSV.grid(row = 1)
-        self.generate.grid(row = 4)
-        self.exitButton.grid(row = 6)
-        self.testButton.grid(row = 7)
+        self.selectCSV.grid(row = 2, padx = 10, pady = 20)
+        self.generate.grid(row = 6, pady = 10)
+        self.exitButton.grid(row =9, column = 0)
+        # self.testButton.grid(row = 6, column = 1)
 
         # ---- Progress Bar ---- #
         self.my_progress = ttk.Progressbar(frame, orient=HORIZONTAL, length=app_width-(app_width*0.2), mode = 'determinate')
-        self.progress_label = Label(frame, text=f"{self.percentageComplete}%")
+        self.progress_label = Label(frame, text=f"{self.percentageComplete}%", bg = backgroundColour)
         # Position elements
-        self.my_progress.grid(row = 5)
-        self.progress_label.grid(row = 8)
+        self.my_progress.grid(row = 5, column = 0)
+        self.progress_label.grid(row = 5, column = 1)
 
         # ---- Labels ---- #
-        self.welcome = Label(frame, text="Invoice Generator V1.0 - Cal", height=2)
-
-        self.whichDirectory = self.filename
-        if len(self.filename) == 0:
-            self.whichDirectory = "nothing selected"
-            
-        self.currentlySelected = Label(frame, text=f"File: {self.whichDirectory}")
+        # self.welcome = Label(frame, text="Invoice Generator V1.0 - Cal", bg = backgroundColour)
+        self.step1 = Label(frame, text="Step 1. Select your spreadsheet containing ALL \norders from the past 2 weeks", bg = backgroundColour, pady=5)
+        self.step2 = Label(frame, text="Step 2. Click \"Generate Invoices\" to generate the invoices", bg = backgroundColour, pady=10)
+        self.whichDirectory = "No file selected"
+        self.currentlySelected = Label(frame, text=f"File: {self.whichDirectory}", background = "yellow")
         # Position labels
-        self.welcome.grid(row=0)
-        self.currentlySelected.grid(row = 2)
-        
+        # self.welcome.grid(row=0)
+        self.step1.grid(row=1)
+        self.currentlySelected.grid(row = 3)
+        self.step2.grid(row = 4)
+
     def selectFile(self, master):
         print("Selecting CSV/Excel file")
         # Current directory
@@ -137,10 +137,11 @@ class InvoiceGUI:
                 try:
                     o.main(self.filename)
                     self.whichDirectory = self.filename
+                    self.currentlySelected.config(text=f"File: {self.filename}", bg = "lightgreen")
                     self.master.update_idletasks()
                     self.filename = "reformatted_" + self.filename
-                except:
-                    print(f"[*]\t\t\tfail")
+                except Exception as e:
+                    print(f"[*]\tFail\t{e}")
             # Check if it's an excel file
             else:
                 print(f"Not sure what format this is...\"{self.filename}\"")
@@ -154,7 +155,7 @@ class InvoiceGUI:
         unitCost = 0
         totalDolla = 0
         thread_list = []
-        
+
         for invoice in array_of_invoices:
             totalLitres += invoice.items[0]['quantity']
             unitCost = invoice.items[0]['unit_cost']

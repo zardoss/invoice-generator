@@ -19,18 +19,18 @@ path = pathlib.Path(f"{currentpath}/{invoiceFolder}")
 nInvoices = 0
 # Manually set attributes for the invoices
 # For my company
-# from_who = "Kelland Dairy\nLapford, Crediton\nEX17 6AG\n"
-# customNote = "Thank you for choosing Kelland Dairy!\n\nIf you need to contact us, you can email or call us.\nmilk@kellanddairy.co.uk\n01363 779134\n\nIf you want to know more about us, visit our website!\nwww.kellanddairy.co.uk"
-# ukCurrency = "GBP"
-# ourLogo = "https://www.kellanddairy.co.uk/wp-content/uploads/2018/07/Kelland-Dairy-Final-450-Logo.png"
-# bankInfo = "Payment methods: Bank Transfer, BACS, Standing order or Cheque\nSort code: 30-93-14\nAccount Number: 0556 9802"
+from_who = "Kelland Dairy\nLapford, Crediton\nEX17 6AG\n"
+customNote = "Thank you for choosing Kelland Dairy!\n\nIf you need to contact us, you can email or call us.\nmilk@kellanddairy.co.uk\n01363 779134\n\nIf you want to know more about us, visit our website!\nwww.kellanddairy.co.uk"
+ukCurrency = "GBP"
+ourLogo = "https://www.kellanddairy.co.uk/wp-content/uploads/2018/07/Kelland-Dairy-Final-450-Logo.png"
+bankInfo = "Payment methods: Bank Transfer, BACS, Standing order or Cheque\nSort code: 30-93-14\nAccount Number: 0556 9802"
 
 # For public show
-from_who = "Leaf Lane\nLeaf City\nLE4F C1T1\n"
-customNote = "Thank you for choosing Leaf!\n\nIf you need to contact us, you can email or call us.\nmilk@leaf.co.uk\n011111 11111\n\nIf you want to know more about us, visit our website!\nwww.leaf.co.uk"
-ukCurrency = "GBP"
-ourLogo = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/1f9ed517-f705-42e3-960a-9d56d8bb2f67/d7gesj7-99f809b9-6219-4e50-8a59-d1fd1b41a350.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3sicGF0aCI6IlwvZlwvMWY5ZWQ1MTctZjcwNS00MmUzLTk2MGEtOWQ1NmQ4YmIyZjY3XC9kN2dlc2o3LTk5ZjgwOWI5LTYyMTktNGU1MC04YTU5LWQxZmQxYjQxYTM1MC5wbmcifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6ZmlsZS5kb3dubG9hZCJdfQ.PeFz4A2VN7EPrkbSPt6cmhuhHLU4enYznwCE23GN85g"
-bankInfo = "Payment methods: Bank Transfer, BACS, Standing order or Cheque\nSort code: 01-02-03\nAccount Number: 1234 5678"
+# from_who = "Leaf Lane\nLeaf City\nLE4F C1T1\n"
+# customNote = "Thank you for choosing Leaf!\n\nIf you need to contact us, you can email or call us.\nmilk@leaf.co.uk\n011111 11111\n\nIf you want to know more about us, visit our website!\nwww.leaf.co.uk"
+# ukCurrency = "GBP"
+# ourLogo = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/1f9ed517-f705-42e3-960a-9d56d8bb2f67/d7gesj7-99f809b9-6219-4e50-8a59-d1fd1b41a350.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3sicGF0aCI6IlwvZlwvMWY5ZWQ1MTctZjcwNS00MmUzLTk2MGEtOWQ1NmQ4YmIyZjY3XC9kN2dlc2o3LTk5ZjgwOWI5LTYyMTktNGU1MC04YTU5LWQxZmQxYjQxYTM1MC5wbmcifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6ZmlsZS5kb3dubG9hZCJdfQ.PeFz4A2VN7EPrkbSPt6cmhuhHLU4enYznwCE23GN85g"
+# bankInfo = "Payment methods: Bank Transfer, BACS, Standing order or Cheque\nSort code: 01-02-03\nAccount Number: 1234 5678"
 
 
 @dataclass
@@ -99,20 +99,18 @@ class ApiConnector:
             typer.echo("Fail :", r.text)
 
     def save_invoice_to_pdf(self, pdf_content: str, invoice: Invoice) -> None:
+        invoive_name = invoice.name.rstrip()
         invoice_name = f"{invoice.name}_invoice.pdf"
         invoice_path = f"{self.invoices_directory}/{invoice_name}"
         with open(invoice_path, 'wb') as f:
             typer.echo(f"[*]\t\tGenerated invoice for {invoice_name}")
-            try:
-                f.write(pdf_content)
-            except Exception as e:
-                print("Error >> ", e)
+            f.write(pdf_content)
 
 # Checks internet connection
 def checkConnection():
     try:
         request = requests. get(url, timeout=timeout)
-        print("[*]\tInternet Connection : Estabilished")
+        # print("[*]\tInternet Connection : Estabilished")
         return True
     except (requests. ConnectionError, requests. Timeout) as exception:
         print("[*]\tInternet Connection : Failed")
@@ -159,14 +157,18 @@ def main(csv_name: str = typer.Argument('invoices.csv')):
 
 # Function overload to take one invoice
 def main(invoice):
+    # Lets the user know it's running
+    if checkConnection() == False:
+        print("[*]\tInternet required to run")
+        print("[*]\tFailed to generate invoices")
+        exit()
     # print("[*]\tGenerating single invoice")
     createDirectory()
     api = ApiConnector()
     try:
         api.connect_to_api_and_save_invoice_pdf(invoice)
     except Exception as e:
-        invoice.name.rstrip()
-        print(f"[*]\tUnable to save {invoice.name}'s invoice\t{e}")
+        print(f"[*]\tUnable to save invoice\t{e}")
         exit()
 
 
