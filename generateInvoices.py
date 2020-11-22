@@ -11,7 +11,7 @@ url = "https://invoice-generator.com"
 timeout = 5
 # Current working directory
 currentpath = os.getcwd()
-# Folder we want to store invoices to
+# Folder name we want
 invoiceFolder = "invoices"
 # Directory where we want invoices to go
 path = pathlib.Path(f"{currentpath}/{invoiceFolder}")
@@ -78,6 +78,7 @@ class ApiConnector:
         self.url = 'https://invoice-generator.com'
         # TODO; write description
         self.invoices_directory = f"{os.path.dirname(os.path.abspath(__file__))}/{'invoices'}"
+        # print(f"{self.invoices_directory}")
 
     def connect_to_api_and_save_invoice_pdf(self, invoice: Invoice) -> None:
         invoice_parsed = {
@@ -99,8 +100,7 @@ class ApiConnector:
             typer.echo("Fail :", r.text)
 
     def save_invoice_to_pdf(self, pdf_content: str, invoice: Invoice) -> None:
-        invoive_name = invoice.name.rstrip()
-        invoice_name = f"{invoice.name}_invoice.pdf"
+        invoice_name = f"{invoice.name}'s invoice.pdf"
         invoice_path = f"{self.invoices_directory}/{invoice_name}"
         with open(invoice_path, 'wb') as f:
             typer.echo(f"[*]\t\tGenerated invoice for {invoice_name}")

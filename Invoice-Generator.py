@@ -1,4 +1,5 @@
 from sys import platform
+from sys import exit
 import os
 from tkinter import *
 from tkinter import ttk
@@ -36,10 +37,10 @@ class InvoiceGUI:
     def __init__(self, master):
         backgroundColour = "lightgrey"
         self.master = master
-        master.title("Invoice Generator V1.0 - Cal")
+        master.title("Generator V1.0")
         master.config(bg=backgroundColour)
+        # master.resizable(width=False, height =False)
         
-
         # ---- Screen Properties ---- #
         app_width = 350
         app_height = 400
@@ -47,7 +48,7 @@ class InvoiceGUI:
         widthbtn = int(app_width*0.5)
         heightbtn = int(app_height*0.1)
         if windows: 
-            # Resize buttons
+            # Resize buttons to cater for windows weird ways
             widthbtn = int(app_width*0.08)
             heightbtn = int(app_height*0.005)
 
@@ -65,8 +66,9 @@ class InvoiceGUI:
         master.after_idle(master.attributes,'-topmost',False)
     
         frame = Frame(master)
-        frame.config(bg = backgroundColour)
-        frame.pack()
+        frame.config(height=app_height, width=app_width,  bg = backgroundColour)
+        # frame.config(highlightbackground="black", highlightthickness=3)
+        frame.pack(padx = app_width*0.05, pady= app_height*0.05)
         
         # Variables
         self.filename = ""
@@ -75,38 +77,64 @@ class InvoiceGUI:
 
         # ---- Buttons ---- #
         # Lambda reference: https://stackoverflow.com/questions/6920302/how-to-pass-arguments-to-a-button-command-in-tkinter
-        self.selectCSV = Button(frame, text="Select your spreadsheet", bg="white", command=lambda: self.selectFile(master))
+        self.chooseFile = Button(frame, text="Select your spreadsheet", bg="white", command=lambda: self.selectFile(master))
         self.generate= Button(frame, text="Generate Invoices!", bg="white", command=self.generateInvoices)
-        self.exitButton = Button(frame, text="Exit", bg="yellow", fg="black", command=exit)
-        # self.testButton = Button(frame, text="test", bg= "red", command=lambda: threading.Thread(target=self.testStep, args=(100,1)).start())
-        # Set buttons sizes
-        self.selectCSV.config(width = widthbtn, height = heightbtn)
+        self.exitProgram = Button(frame, text="Exit", bg="yellow", fg="black", command=exit)
+            # Set buttons sizes
+        self.chooseFile.config(width = widthbtn, height = heightbtn)
         self.generate.config(width = widthbtn, height = heightbtn)
-        self.exitButton.config(width = int(widthbtn*0.6), height = int(heightbtn*0.6))
-        # Position buttons
-        self.selectCSV.grid(row = 2, padx = 10, pady = 20)
-        self.generate.grid(row = 6, pady = 10)
-        self.exitButton.grid(row =9, column = 0)
-        # self.testButton.grid(row = 6, column = 1)
+        self.exitProgram.config(width = int(widthbtn*0.6), height = int(heightbtn*0.6))
 
         # ---- Progress Bar ---- #
         self.my_progress = ttk.Progressbar(frame, orient=HORIZONTAL, length=app_width-(app_width*0.2), mode = 'determinate')
         self.progress_label = Label(frame, text=f"{self.percentageComplete}%", bg = backgroundColour)
-        # Position elements
-        self.my_progress.grid(row = 5, column = 0)
-        self.progress_label.grid(row = 5, column = 1)
-
+        
         # ---- Labels ---- #
-        # self.welcome = Label(frame, text="Invoice Generator V1.0 - Cal", bg = backgroundColour)
-        self.step1 = Label(frame, text="Step 1. Select your spreadsheet containing ALL \norders from the past 2 weeks", bg = backgroundColour, pady=5)
-        self.step2 = Label(frame, text="Step 2. Click \"Generate Invoices\" to generate the invoices", bg = backgroundColour, pady=10)
+        self.stepOne = Label(frame, text="Step 1. Select your spreadsheet containing ALL \norders from the past 2 weeks", bg = backgroundColour, padx = 5,pady=5)
+        self.stepTwo = Label(frame, text="Step 2. Click \"Generate Invoices\" \nto generate the invoices", bg = backgroundColour, pady=10)
         self.whichDirectory = "No file selected"
         self.currentlySelected = Label(frame, text=f"File: {self.whichDirectory}", background = "yellow")
-        # Position labels
-        # self.welcome.grid(row=0)
-        self.step1.grid(row=1)
-        self.currentlySelected.grid(row = 3)
-        self.step2.grid(row = 4)
+        # Checks if internet connection is good
+        self.connection = "Connected"
+        self.connectionBG = "lightgreen"
+        if self.checkInternetConnection == False:
+            self.connection = "Not Connected"
+            self.connectionBG = "red"
+
+        self.internetStatus = Label(frame, text=f"Internet: {self.connection}", bg = self.connectionBG)
+        # Check what stage user is at
+        self.stage = Label(frame)
+        self.currentStage(1)
+
+        # # ---- Position tkinter GUI elements ---- #
+        # self.stepOne.grid(row=1, columnspan=2, sticky='ew')
+        # self.chooseFile.grid(row = 2, columnspan = 2, sticky='ew')
+        # self.currentlySelected.grid(row = 3)
+        # self.internetStatus.grid(row=3, column=1)
+        # self.stepTwo.grid(row = 4, columnspan = 2)
+        # # ---- Progress bar / label
+        # self.my_progress.grid(row = 5, columnspan = 2, sticky='nsew')
+        # self.progress_label.grid(row = 5, column = 1, sticky='w')
+        # # ---- Generate Button
+        # self.generate.grid(row = 6, columnspan = 2, pady = 10)
+        # self.stage.grid(row=7, columnspan = 2)
+        # self.exitProgram.grid(row = 9, columnspan = 2)
+        # ---- Position tkinter GUI elements (place) ---- #
+        self.stepOne.place(relx = 0.5, rely = 0.08, anchor=CENTER, bordermode=INSIDE)
+        self.chooseFile.place(relx=0.5, rely = 0.2, anchor=CENTER)
+        self.currentlySelected.place(relx = 0.25, rely = 0.3, anchor = CENTER)
+        self.internetStatus.place(relx = 0.75, rely = 0.3, anchor = CENTER)
+        self.stepTwo.place(relx = 0.5, rely = 0.45, anchor=CENTER, bordermode=INSIDE)
+        # ---- Progress bar / label
+        self.my_progress.place(width = 200, relx = 0.46, rely = 0.55, anchor=CENTER)
+        self.progress_label.place(relx = 0.85, rely = 0.55, anchor=CENTER)
+        # ---- Generate Button
+        self.generate.place(relx = 0.5, rely = 0.65, anchor = CENTER)
+        self.stage.place(relx = 0.5, rely = 0.75, anchor = CENTER)
+        self.exitProgram.place(relx = 0.5, rely = 0.9, anchor=CENTER)
+
+
+        
 
     def selectFile(self, master):
         print("Selecting CSV/Excel file")
@@ -140,6 +168,7 @@ class InvoiceGUI:
                     self.currentlySelected.config(text=f"File: {self.filename}", bg = "lightgreen")
                     self.master.update_idletasks()
                     self.filename = "reformatted_" + self.filename
+                    self.currentStage(2)
                 except Exception as e:
                     print(f"[*]\tFail\t{e}")
             # Check if it's an excel file
@@ -147,6 +176,7 @@ class InvoiceGUI:
                 print(f"Not sure what format this is...\"{self.filename}\"")
 
     def generateInvoices(self):
+        self.currentStage(3)
         csv_reader = g.CSVParser(self.filename)
         array_of_invoices = csv_reader.get_array_of_invoices()
         print(f"[*]\tGenerating invoices from : {self.filename}")
@@ -157,54 +187,46 @@ class InvoiceGUI:
         thread_list = []
 
         for invoice in array_of_invoices:
-            totalLitres += invoice.items[0]['quantity']
-            unitCost = invoice.items[0]['unit_cost']
-            totalDolla += (totalLitres*unitCost)
+            for item in invoice.items:
+                totalLitres += item['quantity']
+                unitCost = item['unit_cost']
+                totalDolla += (totalLitres*unitCost)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            # steps = [executor.map(self.step,(len(array_of_invoices), _)) for _ in len(array_of_invoices)]
             results = executor.map(self.generateOneInvoice, array_of_invoices)
-        
+
+        print(f"[*]\tTotals:\t {totalLitres} Litres\t £{totalLitres*1.45}")
         if self.counter >= len(array_of_invoices):
             print(f"[*]\tTotals:\t {totalLitres} Litres\t £{totalLitres*1.45}")
             print("[*]\tAll invoices have been successfully generated!")
+            self.currentStage(4)
+ 
+    def checkInternetConnection(self):
+        try:
+            request = requests. get("https://www.google.com", timeout=timeout)
+            # print("[*]\tInternet Connection : Estabilished")
+            return True
+        except (requests. ConnectionError, requests. Timeout) as exception:
+            # print("[*]\tInternet Connection : Failed")
+            return False
 
-        # for invoice in array_of_invoices:
-        #     totalLitres += invoice.items[0]['quantity']
-        #     unitCost = invoice.items[0]['unit_cost']
-        #     totalDolla += (totalLitres*unitCost)
-        #     # with concurrent.futures.ThreadPoolExecutor() as executor:
-        #     #     results = [executor.submit(self.generateOneInvoice, invoice) for invoice in array_of_invoices]
-        #     #     thread = executor.submit(self.generateOneInvoice, invoice)
-        #     # thread = threading.Thread(target=self.generateOneInvoice, args=(invoice,))
-        #     # thread_list.append(thread)
+    def currentStage(self, stageNo):
+        # Stages
+        # Stage 1 - Awaiting file selection
+        # Stage 2 - File ready - Press generate
+        # Stage 3 - Generating invoices...
+        # Stage 4 - Finishes generating invoices.
+        if stageNo == 1:
+            self.stage.config(text="Awaiting File...", bg="orange")
+        elif stageNo == 2:
+            self.stage.config(text="File is ready - Press Generate!", bg = "lightgreen")
+        elif stageNo == 3:
+            print("stage 3")
+            self.stage.config(text="Generating Invoices...", bg = "yellow")
+        elif stageNo == 4:
+            self.stage.config(text="Finished generating invoices!", bg="green")
 
-        # for thread in thread_list:
-        #     counter += 1
-        #     invoiceIndex = thread_list.index(thread)
-            
-        #     try:
-        #         # self.step(nInvoices, counter)
-        #         threading.Thread(target=self.step, args = (len(array_of_invoices), counter,)).start()
-        #         thread.start()
-        #         # thread.join()
-        #         # threading.Thread(self.generateOneInvoice, invoice).start()
-        #         # threading.Thread(target=self.generateOneInvoice, args=(invoice)).start()
-        #         # self.generateOneInvoice(invoice)
-        #     except Exception as e:
-        #         self.failed = True
-        #         print(f"Couldn't generate invoice for {invoiceIndex}: {invoice.name}\t{e}")
-        #         # return
-    
-        #     if counter == len(array_of_invoices) and self.failed == False:
-        #         print(f"[*]\tTotals:\t {totalLitres} Litres\t £{totalLitres*1.45}")
-        #         print("[*]\tAll invoices have been successfully generated!")
-        #     elif self.failed == True:
-        #         print("[*]\tInvoices failed to generate")
-
-        # for thread in thread_list:
-        #     thread.join()
-        
+        self.master.update_idletasks()
 
     def generateOneInvoice(self, invoice):
         g.main(invoice)
