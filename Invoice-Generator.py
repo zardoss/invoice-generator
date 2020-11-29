@@ -5,6 +5,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog as fdialog
 from tkinter import Label
+import requests
 import pandas as pd
 import threading
 import time
@@ -37,7 +38,8 @@ class InvoiceGUI:
     def __init__(self, master):
         backgroundColour = "lightgrey"
         self.master = master
-        master.title("Generator V1.0")
+        master.wm_iconbitmap('ig_logo.ico')
+        master.title("Invoice Generator V1.0 - Cal")
         master.config(bg=backgroundColour)
         # master.resizable(width=False, height =False)
         
@@ -70,10 +72,17 @@ class InvoiceGUI:
         # frame.config(highlightbackground="black", highlightthickness=3)
         frame.pack(padx = app_width*0.05, pady= app_height*0.05)
         
+        # Threading related variables
+        self.threadLock = threading.Lock()
+
         # Variables
         self.filename = ""
         self.my_progress = {'value': 0}
         self.percentageComplete = 0
+        self.complete = 0
+        self.totalInvoices = 0
+        self.fakeTotal = 0
+        self.timeout = 5
 
         # ---- Buttons ---- #
         # Lambda reference: https://stackoverflow.com/questions/6920302/how-to-pass-arguments-to-a-button-command-in-tkinter
@@ -94,31 +103,11 @@ class InvoiceGUI:
         self.stepTwo = Label(frame, text="Step 2. Click \"Generate Invoices\" \nto generate the invoices", bg = backgroundColour, pady=10)
         self.whichDirectory = "No file selected"
         self.currentlySelected = Label(frame, text=f"File: {self.whichDirectory}", background = "yellow")
-        # Checks if internet connection is good
-        self.connection = "Connected"
-        self.connectionBG = "lightgreen"
-        if self.checkInternetConnection == False:
-            self.connection = "Not Connected"
-            self.connectionBG = "red"
-
-        self.internetStatus = Label(frame, text=f"Internet: {self.connection}", bg = self.connectionBG)
+        self.internetStatus = Label(frame, text = "Loading...")
         # Check what stage user is at
         self.stage = Label(frame)
         self.currentStage(1)
-
-        # # ---- Position tkinter GUI elements ---- #
-        # self.stepOne.grid(row=1, columnspan=2, sticky='ew')
-        # self.chooseFile.grid(row = 2, columnspan = 2, sticky='ew')
-        # self.currentlySelected.grid(row = 3)
-        # self.internetStatus.grid(row=3, column=1)
-        # self.stepTwo.grid(row = 4, columnspan = 2)
-        # # ---- Progress bar / label
-        # self.my_progress.grid(row = 5, columnspan = 2, sticky='nsew')
-        # self.progress_label.grid(row = 5, column = 1, sticky='w')
-        # # ---- Generate Button
-        # self.generate.grid(row = 6, columnspan = 2, pady = 10)
-        # self.stage.grid(row=7, columnspan = 2)
-        # self.exitProgram.grid(row = 9, columnspan = 2)
+        
         # ---- Position tkinter GUI elements (place) ---- #
         self.stepOne.place(relx = 0.5, rely = 0.08, anchor=CENTER, bordermode=INSIDE)
         self.chooseFile.place(relx=0.5, rely = 0.2, anchor=CENTER)
@@ -132,9 +121,6 @@ class InvoiceGUI:
         self.generate.place(relx = 0.5, rely = 0.65, anchor = CENTER)
         self.stage.place(relx = 0.5, rely = 0.75, anchor = CENTER)
         self.exitProgram.place(relx = 0.5, rely = 0.9, anchor=CENTER)
-
-
-        
 
     def selectFile(self, master):
         print("Selecting CSV/Excel file")
@@ -180,6 +166,7 @@ class InvoiceGUI:
         csv_reader = g.CSVParser(self.filename)
         array_of_invoices = csv_reader.get_array_of_invoices()
         print(f"[*]\tGenerating invoices from : {self.filename}")
+        self.totalInvoices = len(array_of_invoices)
         self.counter = 0
         totalLitres = 0
         unitCost = 0
@@ -191,24 +178,44 @@ class InvoiceGUI:
                 totalLitres += item['quantity']
                 unitCost = item['unit_cost']
                 totalDolla += (totalLitres*unitCost)
-
+        
+        self.fakeTotal = len(array_of_invoices)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             results = executor.map(self.generateOneInvoice, array_of_invoices)
-
+            try:
+                while self.complete < self.fakeTotal:
+                    with self.threadLock:
+                        self.step(len(array_of_invoices), self.complete)
+                        print(f"{self.complete}/{self.fakeTotal}")
+                    time.sleep(1)
+            except Exception as e:
+                print(f"Error >> {e}")
+                print(f"{self.complete} / {len(array_of_invoices)} invoices generated")
+            
         print(f"[*]\tTotals:\t {totalLitres} Litres\t £{totalLitres*1.45}")
-        if self.counter >= len(array_of_invoices):
-            print(f"[*]\tTotals:\t {totalLitres} Litres\t £{totalLitres*1.45}")
+        if self.complete >= len(array_of_invoices) and self.fakeTotal == len(array_of_invoices):
             print("[*]\tAll invoices have been successfully generated!")
             self.currentStage(4)
- 
+            self.master.update_idletasks()
+        elif self.complete >= self.fakeTotal and self.fakeTotal < len(array_of_invoices):
+            print(f"[*]\tSome invoices were generated... {self.complete}/{len(array_of_invoices)}")
+            self.currentStage(5)
+            self.master.update_idletasks()
+
     def checkInternetConnection(self):
         try:
-            request = requests. get("https://www.google.com", timeout=timeout)
+            request = requests.get("https://www.google.com", timeout=self.timeout)
             # print("[*]\tInternet Connection : Estabilished")
             return True
-        except (requests. ConnectionError, requests. Timeout) as exception:
+        except (requests.ConnectionError, requests.Timeout) as exception:
             # print("[*]\tInternet Connection : Failed")
             return False
+    def invoiceGenerationStatus(self):
+        percentageComplete = 0
+        if self.totalInvoices > 0:
+            percentageComplete = self.totalInvoices/self.complete
+
+        return percentageComplete
 
     def currentStage(self, stageNo):
         # Stages
@@ -225,13 +232,26 @@ class InvoiceGUI:
             self.stage.config(text="Generating Invoices...", bg = "yellow")
         elif stageNo == 4:
             self.stage.config(text="Finished generating invoices!", bg="green")
+        elif stageNo == 5:
+            self.stage.config(text="Finished generating some of the invoices...", bg="maroon")
 
         self.master.update_idletasks()
 
     def generateOneInvoice(self, invoice):
-        g.main(invoice)
-        self.counter += 1
-        # self.step(totalInvoices, 1)
+        print(f"[*] Generating Invoice for {invoice.name}")
+        # try:
+        try:
+            g.main(invoice)
+            with self.threadLock:
+                self.complete += 1
+        except:
+            print(f"Error >> {e}")
+            self.fakeTotal -= 1
+            # except Exception as e:
+                # print(f"Error >> {e}")
+                # print(f"{self.complete} / {len(array_of_invoices)} invoices generated")
+        # except:
+        #     print("[*]\tFailed to generate invoice for {invoice.name}")
 
     def testStep(self, invoice_total, invoices_done):
         if invoice_total > 0:
@@ -243,19 +263,48 @@ class InvoiceGUI:
             print("give vals")
 
     def step(self, invoice_total, invoices_done):
-        if self.my_progress['value'] == 100:
-            print("done")
-        else:
-            percentageComplete = (invoices_done / invoice_total)*100
-            
-            # Update progress bar val
-            self.my_progress['value'] = percentageComplete
-            # Update label val
-            self.progress_label.config(text=f"{percentageComplete}%")
+        # print(f"{invoices_done} / {invoice_total}")
+
+        # if self.my_progress['value'] == 100:
+            # print("done")
+        # else:
+        try:
+            self.percentageComplete = round((invoices_done / invoice_total)*100, 2)
+        except Exception as e:
+            print(f"Error >> {e}")
+        # Update progress bar val
+        try:
+            self.my_progress['value'] = self.percentageComplete
+        except Exception as e:
+            print(f"Error >> {e}")
+        # Update label val
+        try:
+            self.progress_label.config(text=f"{self.percentageComplete}%")
+        except Exception as e:
+            print(f"Error >> {e}")
+        
+        try:
             self.master.update_idletasks()
-        # print(f"{my_progress['value']}")
-        # time.sleep(1)
+        except:
+            print(f"Error >> {e}")
+
+    def task(self):
+        print("Checking in background")
+        # Checks if internet connection is good
+        if self.checkInternetConnection is False:
+            self.internetStatus.config(text=" Internet : Disconnected ", bg = "red")
+        else:
+            self.internetStatus.config(text=" Internet : Connected ", bg = "lightgreen")
+
+        # print(f"{self.invoiceGenerationStatus}")
+        percentageComplete = self.invoiceGenerationStatus()
+        if  percentageComplete > 0:
+            self.progress_label.config(text=f"{self.invoiceGenerationStatus}")
+
+        self.master.update_idletasks()
+        self.master.after(5000, self.task)
 
 root = Tk()
 e = InvoiceGUI(root)
+root.after(2000, e.task)
 root.mainloop()

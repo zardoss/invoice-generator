@@ -92,10 +92,20 @@ Contact me via Discord: zardoss#6558
 <h3>Spreadsheet references</h3>
 
 - [Multiple tables into master table](https://www.youtube.com/watch?v=q8awNSYNdq4)
-- []()
+
 ---
+
+<h2>Tkinter - GUI<a name="tkinter"></a></h2>
+I tried using tkinter GUI library but faced a freezing issue which occured when generating the PDF invoices. I even tried threading and the GUI still froze. It's a good GUI besides that. I favoured the place layout methods as I could place GUI elements relative to the GUI window's size. 
+
+<h2>PyQt5 - GUI<a name="pyqt5"></a></h2>
+Currently working on a GUI using PyQt5 Library.
+<!--When changing values of the labels, you need to resize them too.-->
 
 <h2> Credits <a name="credits"></a></h2>
 Discord User : Felixi#4661
 </br>
 Helped me regarding the formatting of the list[dict] required for the items column in the CSV file. This is required for listing the items in the PDF via the invoice-generator.
+</br></br>
+Discord User: thatjoe#1201
+Helped me in regards to threading/ attempting to multithread the tasks. It worked but unfortunately tkinter can't handle it and freezes regardless of whether I use threads or not!

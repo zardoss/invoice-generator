@@ -13,6 +13,14 @@ venv
 *.csv
 *.DS_Store
 *.xlsx
+*.ui
+*.ico
+Images
+dist
+build
+__pycache__
+invoices
+
 
 ### Django ###
 *.log

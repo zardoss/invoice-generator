@@ -8,7 +8,7 @@ import typer
 
 # For checking internet connection to website we're using
 url = "https://invoice-generator.com"
-timeout = 5
+timeout = 10
 # Current working directory
 currentpath = os.getcwd()
 # Folder name we want
@@ -101,7 +101,8 @@ class ApiConnector:
 
     def save_invoice_to_pdf(self, pdf_content: str, invoice: Invoice) -> None:
         invoice_name = f"{invoice.name}'s invoice.pdf"
-        invoice_path = f"{self.invoices_directory}/{invoice_name}"
+        invoice_path = f"{path}/{invoice_name}"
+        
         with open(invoice_path, 'wb') as f:
             typer.echo(f"[*]\t\tGenerated invoice for {invoice_name}")
             f.write(pdf_content)
@@ -168,7 +169,7 @@ def main(invoice):
     try:
         api.connect_to_api_and_save_invoice_pdf(invoice)
     except Exception as e:
-        print(f"[*]\tUnable to save invoice\t{e}")
+        print(f"[*]\tUnable to save invoice\nError >> {e}")
         exit()
 
 
