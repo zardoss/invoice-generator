@@ -10,8 +10,9 @@
     4. [Invoices](#invoices)
 3. [How does it work?](#howdoesthiswork)
 4. [Any issues?](#anyissues)
-5. [References](#references)
-6. [Credits](#credits)
+5. [Invoices generator GUI](#GUI)
+6. [References](#references)
+7. [Credits](#credits)
 
 ---
 
@@ -80,6 +81,28 @@ Contact me via Discord: zardoss#6558
 
 ---
 
+<h3>Invoice generator GUI<a name="GUI"></a></h3>
+<!-- <h2>Tkinter - GUI<a name="tkinter"></a></h2> -->
+I tried using tkinter GUI library but faced a freezing issue which occured when generating the PDF invoices. I even tried threading and the GUI still froze. It's a good GUI besides that. I favoured the place layout methods as I could place GUI elements relative to the GUI window's size. 
+
+<!-- <h2>PyQt5 - GUI<a name="pyqt5"></a></h2> -->
+Ended up reworking the GUI with PyQt5 library.
+<h3>Loading screen</h3>
+<!--When changing values of the labels, you need to resize them too.-->
+<img src="READMEImages/load.png" alt="Loading screen">
+I thought it was a quite cool learning experience to incorporate a loading screen to my invoice-generator's GUI. It works a charm and looks really cool.
+
+<h3>Invoice-generator main screen</h3>
+<img src="READMEImages/vin1.png" alt="Main screen">
+Here's a prototype main screen I've done in the past - bit of a jokey design but definitely aided in learning more about the PyQt5 library as a whole. I've added the essential buttons to the GUI making it easier to use. This is quite an intuitive design for someone to use. There's a progress bar to let them know how far along the program is when it generates invoices!
+
+I'm currently working toward incorporating some form of threading into the program so:
+1. The GUI window doesn't freeze up.
+2. The invoices generate faster 10 fold.
+
+---
+
+
 <h2> References <a name="references"></a></h2>
 <h3>Python Program references</h3>
 
@@ -94,13 +117,6 @@ Contact me via Discord: zardoss#6558
 - [Multiple tables into master table](https://www.youtube.com/watch?v=q8awNSYNdq4)
 
 ---
-
-<h2>Tkinter - GUI<a name="tkinter"></a></h2>
-I tried using tkinter GUI library but faced a freezing issue which occured when generating the PDF invoices. I even tried threading and the GUI still froze. It's a good GUI besides that. I favoured the place layout methods as I could place GUI elements relative to the GUI window's size. 
-
-<h2>PyQt5 - GUI<a name="pyqt5"></a></h2>
-Currently working on a GUI using PyQt5 Library.
-<!--When changing values of the labels, you need to resize them too.-->
 
 <h2> Credits <a name="credits"></a></h2>
 Discord User : Felixi#4661
