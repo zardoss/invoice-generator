@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'load-screen.ui'
+# Form implementation generated from reading ui file 'GUI Layouts/loading_screen2.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.2
 #
@@ -14,29 +14,29 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(720, 450)
+        MainWindow.resize(746, 470)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
-        self.verticalLayout.setObjectName("verticalLayout")
         self.dropShadowFrame = QtWidgets.QFrame(self.centralwidget)
+        self.dropShadowFrame.setGeometry(QtCore.QRect(10, 10, 726, 449))
         self.dropShadowFrame.setStyleSheet("QFrame{\n"
-"    background-color: rgb(56, 59, 89);\n"
-"    color: rgb(96, 198, 54);\n"
+"    \n"
+"    background-color: rgb(255, 255, 255);\n"
+"    color: rgb(255, 81, 0);\n"
 "    border-radius: 10px\n"
 "}")
         self.dropShadowFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.dropShadowFrame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.dropShadowFrame.setObjectName("dropShadowFrame")
-        self.widget = QtWidgets.QWidget(self.dropShadowFrame)
-        self.widget.setGeometry(QtCore.QRect(10, 10, 671, 401))
-        self.widget.setObjectName("widget")
-        self.Load = QtWidgets.QVBoxLayout(self.widget)
+        self.layoutWidget = QtWidgets.QWidget(self.dropShadowFrame)
+        self.layoutWidget.setGeometry(QtCore.QRect(10, 10, 711, 431))
+        self.layoutWidget.setObjectName("layoutWidget")
+        self.Load = QtWidgets.QVBoxLayout(self.layoutWidget)
         self.Load.setContentsMargins(0, 0, 0, 0)
         self.Load.setObjectName("Load")
-        spacerItem = QtWidgets.QSpacerItem(20, 59, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.Load.addItem(spacerItem)
-        self.label_appName = QtWidgets.QLabel(self.widget)
+        self.label_appName = QtWidgets.QLabel(self.layoutWidget)
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
         font.setPointSize(50)
@@ -45,18 +45,20 @@ class Ui_MainWindow(object):
         self.label_appName.setAlignment(QtCore.Qt.AlignCenter)
         self.label_appName.setObjectName("label_appName")
         self.Load.addWidget(self.label_appName)
-        self.label_description = QtWidgets.QLabel(self.widget)
+        self.label_description = QtWidgets.QLabel(self.layoutWidget)
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
         font.setPointSize(14)
         self.label_description.setFont(font)
-        self.label_description.setStyleSheet("color: rgb(32, 162, 11);")
+        self.label_description.setStyleSheet("QLabel{\n"
+"    color: rgb(230, 73, 0);\n"
+"}")
         self.label_description.setAlignment(QtCore.Qt.AlignCenter)
         self.label_description.setObjectName("label_description")
         self.Load.addWidget(self.label_description)
         spacerItem1 = QtWidgets.QSpacerItem(20, 72, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.Load.addItem(spacerItem1)
-        self.progressBar = QtWidgets.QProgressBar(self.widget)
+        self.progressBar = QtWidgets.QProgressBar(self.layoutWidget)
         self.progressBar.setStyleSheet("QProgressBar{\n"
 "    background-color: rgb(0, 154, 0);\n"
 "    color: rgb(200, 200, 200);\n"
@@ -73,27 +75,26 @@ class Ui_MainWindow(object):
         self.progressBar.setAlignment(QtCore.Qt.AlignCenter)
         self.progressBar.setObjectName("progressBar")
         self.Load.addWidget(self.progressBar)
-        self.label_loading = QtWidgets.QLabel(self.widget)
+        self.label_loading = QtWidgets.QLabel(self.layoutWidget)
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
         font.setPointSize(14)
         self.label_loading.setFont(font)
-        self.label_loading.setStyleSheet("color: rgb(32, 162, 11);")
+        self.label_loading.setStyleSheet("color: rgb(255, 78, 0);")
         self.label_loading.setAlignment(QtCore.Qt.AlignCenter)
         self.label_loading.setObjectName("label_loading")
         self.Load.addWidget(self.label_loading)
         spacerItem2 = QtWidgets.QSpacerItem(20, 19, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.Load.addItem(spacerItem2)
-        self.label_credits = QtWidgets.QLabel(self.widget)
+        self.label_credits = QtWidgets.QLabel(self.layoutWidget)
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
         font.setPointSize(14)
         self.label_credits.setFont(font)
-        self.label_credits.setStyleSheet("color: rgb(32, 162, 11);")
+        self.label_credits.setStyleSheet("")
         self.label_credits.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_credits.setObjectName("label_credits")
         self.Load.addWidget(self.label_credits)
-        self.verticalLayout.addWidget(self.dropShadowFrame)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -101,11 +102,11 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Loading Screen"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label_appName.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">INVOICE</span> GENERATOR</p></body></html>"))
         self.label_description.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:13pt; font-weight:600;\">Generating</span><span style=\" font-size:13pt;\"> Company Invoices</span></p></body></html>"))
         self.label_loading.setText(_translate("MainWindow", "<html><head/><body><p>Loading...</p></body></html>"))
-        self.label_credits.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Created: </span>Cal Pal</p></body></html>"))
+        self.label_credits.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Created:    </span>zardoss</p></body></html>"))
 
 
 if __name__ == "__main__":

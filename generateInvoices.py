@@ -36,9 +36,9 @@ bankInfo = "Payment methods: Bank Transfer, BACS, Standing order or Cheque\nSort
 @dataclass
 class Invoice:
     name: str
-    # logo: str
     date: str
     items: List[dict]
+    # logo: str
     # notes: str
     # currency: str
     # terms: str
@@ -56,7 +56,7 @@ class CSVParser:
             # 'currency'
         )
         self.csv_name = csv_name
-
+    
     def get_array_of_invoices(self) -> List[Invoice]:
         with open(self.csv_name, 'r') as f:
             reader = csv.DictReader(f, self.field_names)
@@ -104,7 +104,7 @@ class ApiConnector:
         invoice_path = f"{path}/{invoice_name}"
         
         with open(invoice_path, 'wb') as f:
-            typer.echo(f"[*]\t\tGenerated invoice for {invoice_name}")
+            # typer.echo(f"[*]\t\tGenerated invoice for {invoice.name}")
             f.write(pdf_content)
 
 # Checks internet connection
