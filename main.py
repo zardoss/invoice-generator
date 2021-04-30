@@ -1,23 +1,23 @@
 import os
 import sys
-import time
 import random
 import requests
-import threading
 from threading import Thread
 import pandas as pd
-import concurrent.futures
 # GUI stuff
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QFileDialog, QGraphicsDropShadowEffect, QMessageBox, QShortcut
-from GUI_Layout2 import Ui_MainWindow
-from load_screen2 import Ui_MainWindow as Ui_SplashScreen
+from MainGUI import Ui_MainWindow
+from LoadingScreen import Ui_MainWindow as Ui_SplashScreen
 import qtawesome as qta
+# To merge invoices into 1 pdf for printing
+from PyPDF2 import PdfFileMerger
+import pathlib
 # Own files
-import openCSV as o
-import generateInvoices as g
+import PrepareData as o
+import InvoiceGenerator as g
 
 # Global Variables
 counter = 0
@@ -44,14 +44,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.timeout = 5
         self.offset = None
         self.generatingInvoicesComplete = None
+
         # Initial checks
         self.initChecks()
+
         # MOST IMPORTANT FUNCTION IN THIS PROGRAM
         self.randomVin()
+
         # Assigning functions to buttons
-        # self.ui.button_SelectSpreadsheet.clicked.connect(self.invoiceGeneratingFinished)
         self.ui.button_GenerateInvoices.clicked.connect(self.startGenerating)
-        # self.ui.button_Exit.clicked.connect(exit)
+
         # Keyboard shortcuts
         self.generateShortcut = QShortcut(QKeySequence('g'), self)
         self.generateShortcut.activated.connect(self.startGenerating)
@@ -59,15 +61,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.changeBigVin.activated.connect(self.randomVin)
         self.exit_program = QShortcut(QKeySequence('esc'), self)
         self.exit_program.activated.connect(exit)
+        self.mergeAllPdfFiles = QShortcut(QKeySequence('m'), self)
+        self.mergeAllPdfFiles.activated.connect(self.mergeAllPdf)
 
         # icon name from the qta-browser
-        # icon = qta.icon("mdi.close")
-        # self.ui.button_exit.setIcon(icon)
-        # self.ui.button_exit.clicked.connect(exit)
-        # icon = qta.icon("fa.expand")
-        # self.ui.button_expand.setIcon(icon)
-        # icon = qta.icon("fa5.window-minimize")
-        # self.ui.button_minimise.setIcon(icon)
+        icon = qta.icon("mdi.close")
+        self.ui.button_exit.setIcon(icon)
+        self.ui.button_exit.clicked.connect(exit)
+        icon = qta.icon("fa.expand")
+        self.ui.button_expand.setIcon(icon)
+        icon = qta.icon("fa5.window-minimize")
+        self.ui.button_minimise.setIcon(icon)
 
     def randomVin(self):
         path = r"Images/"
@@ -76,17 +80,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             x for x in os.listdir(path)
             if os.path.isfile(os.path.join(path, x))
         ])
+
         while random_vin == ".DS_Store":
             random_vin = random.choice([
                 x for x in os.listdir(path)
                 if os.path.isfile(os.path.join(path, x))
             ])
 
-        
         random_vin = "kelland.jpg"
         print(f"{path}{random_vin}")
         self.ui.label_logo.setPixmap(QtGui.QPixmap(f"{path}{random_vin}"))
         # threading.Timer(20, self.randomVin).start()
+
+    def mergeAllPdf(self):
+        self.worker = Worker()
+        self.worker.mergeAllInvoices()
 
     def startGenerating(self):
         self.generatingInvoicesComplete = False
@@ -276,6 +284,7 @@ class Worker(QThread):
 
         os.remove(self.filename)
         print(f"[*]\tTotals:\t {totalLitres} Litres\t £{totalDolla}")
+        self.mergeAllInvoices()
         # if self.complete >= len(self.array_of_invoices) and self.fakeTotal == len(self.array_of_invoices):
         #     print("[*]\tAll invoices have been successfully generated!")
         # elif self.complete >= self.fakeTotal and self.fakeTotal < len(self.array_of_invoices):
@@ -346,15 +355,22 @@ class Worker(QThread):
             else:
                 print(f"Not sure what format this is...\"{self.filename}\"")
         self.dFileName = self.filename
-class MiniWorker(QThread):
-    invoice = None
 
-    def run(self):
-        try:
-            g.main(self.invoice)
-            print(f"Generated for {self.invoice.name}")
-        except Exception as e:
-            print(f"Error >> {e}")
+    def mergeAllInvoices(self):
+        # Current working directory
+        currentpath = os.getcwd()
+        # Folder name we want
+        invoiceFolder = "invoices"
+        # Directory where we want invoices to go
+        path = pathlib.Path(f"{currentpath}/{invoiceFolder}")
+        pdfName = "allInvoices.pdf"
+        x = [a for a in os.listdir(path) if a.endswith(".pdf")]
+        merger = PdfFileMerger()
+        for pdf in x:
+            merger.append(open(f"{path}/{pdf}", 'rb'))
+        with open(pdfName, "wb") as fout:
+            merger.write(fout)
+        print(f"Merged all pdf as {pdfName}")
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
